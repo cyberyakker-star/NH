@@ -410,14 +410,13 @@ function select(i){
       '<h3>'+h.name+'</h3>'+
       '<div class="role">'+h.cls+'</div>'+
       '<div class="quote">“'+h.quote+'”</div>'+
+      '<div class="difftag"><i></i>'+t.label+' &nbsp;&middot;&nbsp; '+t.rank+'</div>'+
       '<div class="roast-wrap">'+
         '<button class="roast-btn" id="roast-btn">🔥 Roast '+h.name+'</button>'+
         '<div class="roast-box" id="roast-box"></div>'+
       '</div>'+
-      '<div class="difftag"><i></i>'+t.label+' &nbsp;&middot;&nbsp; '+t.rank+'</div>'+
-      '<div class="loadout" style="margin-bottom:16px">'+lo+'</div>'+
       '<div class="blk"><div class="blk-title">Stat Block</div>'+stats+'</div>'+
-    '</div>';
+      '<div class="loadout" style="margin-top:12px">'+lo+'</div>'+
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     panel.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%');
   }));
