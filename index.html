@@ -122,10 +122,11 @@
   .stat .row .v{font-family:'Space Mono',monospace;color:var(--tier)}
   .bar{height:6px;background:#0b1510;border:1px solid var(--line);border-radius:3px;overflow:hidden}
   .bar i{display:block;height:100%;width:0;background:var(--tier);box-shadow:0 0 8px var(--tier);transition:width .7s cubic-bezier(.2,.7,.2,1)}
-  .loadout{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .lo{border:1px solid var(--line);border-radius:4px;padding:9px 10px;background:#0c1610}
-  .lo .k{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--bone-dim);margin-bottom:3px}
-  .lo .v{font-size:14px;font-weight:600}
+  .loadout{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .lo{border:1px solid var(--line);border-radius:6px;padding:10px 6px 8px;background:#0c1610;text-align:center}
+  .lo .ic{font-size:26px;line-height:1;margin-bottom:4px}
+  .lo .k{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone-dim);margin-bottom:2px}
+  .lo .v{font-size:11px;font-weight:600;color:var(--bone);line-height:1.2}
   .roast-wrap{margin-top:18px}
   .roast-btn{width:100%;font-family:'Anton',sans-serif;font-size:16px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid #ff3333;color:#ff3333;padding:10px 16px;border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
   .roast-btn:hover{background:#ff3333;color:#fff}
@@ -298,7 +299,7 @@ const HIKERS = [
   { name:"Anthony", call:"STILTS", cls:"Pathfinder", tier:"blue", lvl:46, char:"anthony",
     quote:"Long legs, no excuses. Try to keep up.",
     stats:[["Pace",90],["Endurance",88],["Wingspan",99],["Patience",52]],
-    loadout:{"Trail Snack":"Black coffee, no food","Signature Move":"The 3-foot stride","Pack Weight":"Ultralight flex","Catch Phrase":"We're basically there."},
+    loadout:[{ic:"☕",k:"Snack",v:"Black coffee only"},{ic:"👣",k:"Signature",v:"The 3-ft stride"},{ic:"🪶",k:"Pack Weight",v:"Ultralight flex"},{ic:"💬",k:"Catch Phrase",v:"Basically there"}],
     roasts:[
       "Wearing a shirt that says DAD. Has no children. Make it make sense.",
       "Showed up with a military backpack and a walking stick for an 8-mile hike. Bro thinks he's going to Fallujah.",
@@ -310,7 +311,7 @@ const HIKERS = [
   { name:"Spencer", call:"HUSTLE", cls:"The Operator", tier:"black", lvl:58, char:"spencer",
     quote:"I already monetized this hike. You're the content.",
     stats:[["Strength",95],["Hustle",92],["Leg Day",99],["Pace",55]],
-    loadout:{"Trail Snack":"A protein bar he's selling","Signature Move":"Turns the climb into a pitch","Pack Weight":"Branded merch samples","Catch Phrase":"Quick idea while we walk?"},
+    loadout:[{ic:"💪",k:"Snack",v:"Protein bar (for sale)"},{ic:"📈",k:"Signature",v:"Pitch on the ascent"},{ic:"👕",k:"Pack Weight",v:"Branded merch only"},{ic:"💡",k:"Catch Phrase",v:"Quick idea tho"}],
     roasts:[
       "Wore sunglasses and an army cap to the photo shoot like he's a Navy SEAL. Bro sells supplements.",
       "The all-black outfit in a hiking photo is giving 'I failed the police academy and I'm still not over it.'",
@@ -322,7 +323,7 @@ const HIKERS = [
   { name:"Tony", call:"CASANOVA", cls:"Morale Officer", tier:"green", lvl:31, char:"tony",
     quote:"The trail's romantic if you squint. Who's pairing up?",
     stats:[["Charm",99],["Selfies",94],["Pace",60],["Focus",33]],
-    loadout:{"Trail Snack":"Shares to seem deep","Signature Move":"Summit photo for the apps","Pack Weight":"Cologne (weight: regret)","Catch Phrase":"You hike here often?"},
+    loadout:[{ic:"🍇",k:"Snack",v:"Shares to seem deep"},{ic:"📸",k:"Signature",v:"Summit selfie"},{ic:"🌸",k:"Pack Weight",v:"Cologne (regret)"},{ic:"💋",k:"Catch Phrase",v:"You hike here often?"}],
     roasts:[
       "Showed up to a mountain in a light blue t-shirt and a green daypack like he's going to a farmers market.",
       "The beard says rugged outdoorsman. The outfit says I just discovered sourdough.",
@@ -334,7 +335,7 @@ const HIKERS = [
   { name:"Cole", call:"STRINGS", cls:"Camp Bard", tier:"blue", lvl:40, char:"cole",
     quote:"I brought the aux AND the acoustic. You're welcome.",
     stats:[["Campfire Songs",96],["Morale",90],["Endurance",72],["Pace",62]],
-    loadout:{"Trail Snack":"Whatever's in the case","Signature Move":"The campfire setlist","Pack Weight":"Guitar > water","Catch Phrase":"This next one's about the trail."},
+    loadout:[{ic:"🎸",k:"Snack",v:"Whatever fits"},{ic:"🔥",k:"Signature",v:"Campfire setlist"},{ic:"💧",k:"Pack Weight",v:"Guitar > water"},{ic:"🎤",k:"Catch Phrase",v:"This one's for the trail"}],
     roasts:[
       "Showed up shirtless with dog tags like he's auditioning for a Nickelback video set in the woods.",
       "Those dog tags are 100% from a mall kiosk and you know it.",
@@ -346,7 +347,7 @@ const HIKERS = [
   { name:"Jaden", call:"RAVEN", cls:"Lone Wolf", tier:"black", lvl:53, char:"jaden",
     quote:"The summit won't fix me, but we'll try it.",
     stats:[["Aux Cord",95],["Brooding",97],["Vibes",70],["Pace",58]],
-    loadout:{"Trail Snack":"Energy drink, room temp","Signature Move":"Hikes in all black","Pack Weight":"A hoodie in July","Catch Phrase":"Whatever. Let's go."},
+    loadout:[{ic:"⚡",k:"Snack",v:"Energy drink, warm"},{ic:"🖤",k:"Signature",v:"Full black kit"},{ic:"🥵",k:"Pack Weight",v:"Hoodie in July"},{ic:"😑",k:"Catch Phrase",v:"Whatever. Let's go."}],
     roasts:[
       "Took his hiking profile photo in front of a parking garage wall. Peak behavior.",
       "Green Adidas track pants and Air Max 97s on a mountain. Those shoes will be destroyed and he will not care.",
@@ -358,7 +359,7 @@ const HIKERS = [
   { name:"Andrew", call:"BOULDER", cls:"Powerhouse", tier:"gold", lvl:67, char:"andrew",
     quote:"This is just leg day with a view.",
     stats:[["Raw Power",98],["Grip",95],["Endurance",80],["Mobility",60]],
-    loadout:{"Trail Snack":"Six eggs, pre-measured","Signature Move":"Carries a pack for reps","Pack Weight":"A kettlebell (why?)","Catch Phrase":"Are we timing this?"},
+    loadout:[{ic:"🥚",k:"Snack",v:"6 eggs, pre-measured"},{ic:"🏋️",k:"Signature",v:"Pack as extra reps"},{ic:"🔩",k:"Pack Weight",v:"A kettlebell (why?)"},{ic:"⏱️",k:"Catch Phrase",v:"Are we timing this?"}],
     roasts:[
       "Threw up a peace sign in his hiking photo like this is a middle school field trip.",
       "The backwards white cap is doing a lot of heavy lifting for his entire personality.",
@@ -397,8 +398,7 @@ function select(i){
   const stats = h.stats.map(s=>
     '<div class="stat"><div class="row"><span>'+s[0]+'</span><span class="v">'+s[1]+'</span></div>'+
     '<div class="bar"><i data-w="'+s[1]+'"></i></div></div>').join('');
-  const lo = Object.entries(h.loadout).map(([k,v])=>
-    '<div class="lo"><div class="k">'+k+'</div><div class="v">'+v+'</div></div>').join('');
+  const lo = h.loadout.map(x=>'<div class="lo"><div class="ic">'+x.ic+'</div><div class="k">'+x.k+'</div><div class="v">'+x.v+'</div></div>').join('');
   panel.style.setProperty('--tier', t.c);
   panel.innerHTML =
     '<div class="p-left">'+
@@ -410,13 +410,13 @@ function select(i){
       '<h3>'+h.name+'</h3>'+
       '<div class="role">'+h.cls+'</div>'+
       '<div class="quote">“'+h.quote+'”</div>'+
-      '<div class="difftag"><i></i>'+t.label+' &nbsp;&middot;&nbsp; '+t.rank+'</div>'+
-      '<div class="blk"><div class="blk-title">Stat Block</div>'+stats+'</div>'+
-      '<div class="blk"><div class="blk-title">Loadout</div><div class="loadout">'+lo+'</div></div>'+
       '<div class="roast-wrap">'+
         '<button class="roast-btn" id="roast-btn">🔥 Roast '+h.name+'</button>'+
         '<div class="roast-box" id="roast-box"></div>'+
       '</div>'+
+      '<div class="difftag"><i></i>'+t.label+' &nbsp;&middot;&nbsp; '+t.rank+'</div>'+
+      '<div class="blk"><div class="blk-title">Stat Block</div>'+stats+'</div>'+
+      '<div class="blk"><div class="blk-title">Loadout</div><div class="loadout">'+lo+'</div></div>'+
     '</div>';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     panel.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%');
