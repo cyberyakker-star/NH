@@ -122,7 +122,7 @@
   .stat .row .v{font-family:'Space Mono',monospace;color:var(--tier)}
   .bar{height:6px;background:#0b1510;border:1px solid var(--line);border-radius:3px;overflow:hidden}
   .bar i{display:block;height:100%;width:0;background:var(--tier);box-shadow:0 0 8px var(--tier);transition:width .7s cubic-bezier(.2,.7,.2,1)}
-  .loadout{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .loadout{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
   .lo{border:1px solid var(--line);border-radius:6px;padding:10px 6px 8px;background:#0c1610;text-align:center}
   .lo .ic{font-size:26px;line-height:1;margin-bottom:4px}
   .lo .k{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone-dim);margin-bottom:2px}
@@ -415,8 +415,8 @@ function select(i){
         '<div class="roast-box" id="roast-box"></div>'+
       '</div>'+
       '<div class="difftag"><i></i>'+t.label+' &nbsp;&middot;&nbsp; '+t.rank+'</div>'+
+      '<div class="loadout" style="margin-bottom:16px">'+lo+'</div>'+
       '<div class="blk"><div class="blk-title">Stat Block</div>'+stats+'</div>'+
-      '<div class="blk"><div class="blk-title">Loadout</div><div class="loadout">'+lo+'</div></div>'+
     '</div>';
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     panel.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%');
