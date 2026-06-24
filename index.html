@@ -530,27 +530,27 @@ const HIKERS = [
   { name:"Anthony", call:"STILTS", cls:"Pathfinder", tier:"blue", lvl:46, char:"anthony",
     quote:"Long legs, no excuses. Try to keep up.",
     stats:[["Pace",90],["Endurance",88],["Wingspan",99],["Patience",52]],
-    loadout:{"Trail Snack":"Black coffee, no food","Signature Move":"The 3-foot stride","Pack Weight":"Ultralight flex","Catch Phrase":"“We're basically there.”"} },
+    loadout:{"Trail Snack":"Black coffee, no food","Signature Move":"The 3-foot stride","Pack Weight":"Ultralight flex","Catch Phrase":"“We’re basically there.”"} },
 
   { name:"Spencer", call:"HUSTLE", cls:"The Operator", tier:"black", lvl:58, char:"spencer",
-    quote:"I already monetized this hike. You're the content.",
+    quote:"I already monetized this hike. You’re the content.",
     stats:[["Strength",95],["Hustle",92],["Leg Day",99],["Pace",55]],
-    loadout:{"Trail Snack":"A protein bar he's selling","Signature Move":"Turns the climb into a pitch","Pack Weight":"Branded merch samples","Catch Phrase":"“Quick idea while we walk?”"} },
+    loadout:{"Trail Snack":"A protein bar he’s selling","Signature Move":"Turns the climb into a pitch","Pack Weight":"Branded merch samples","Catch Phrase":"“Quick idea while we walk?”"} },
 
   { name:"Tony", call:"CASANOVA", cls:"Morale Officer", tier:"green", lvl:31, char:"tony",
-    quote:"The trail's romantic if you squint. Who's pairing up?",
+    quote:"The trail’s romantic if you squint. Who’s pairing up?",
     stats:[["Charm",99],["Selfies",94],["Pace",60],["Focus",33]],
     loadout:{"Trail Snack":"Shares to seem deep","Signature Move":"Summit photo for the apps","Pack Weight":"Cologne (weight: regret)","Catch Phrase":"“You hike here often?”"} },
 
   { name:"Cole", call:"STRINGS", cls:"Camp Bard", tier:"blue", lvl:40, char:"cole",
-    quote:"I brought the aux AND the acoustic. You're welcome.",
+    quote:"I brought the aux AND the acoustic. You’re welcome.",
     stats:[["Campfire Songs",96],["Morale",90],["Endurance",72],["Pace",62]],
-    loadout:{"Trail Snack":"Whatever's in the case","Signature Move":"The campfire setlist","Pack Weight":"Guitar > water","Catch Phrase":"“This next one's about the trail.”"} },
+    loadout:{"Trail Snack":"Whatever’s in the case","Signature Move":"The campfire setlist","Pack Weight":"Guitar > water","Catch Phrase":"“This next one’s about the trail.”"} },
 
   { name:"Jaden", call:"RAVEN", cls:"Lone Wolf", tier:"black", lvl:53, char:"jaden",
-    quote:"The summit won't fix me, but we'll try it.",
+    quote:"The summit won’t fix me, but we’ll try it.",
     stats:[["Aux Cord",95],["Brooding",97],["Vibes",70],["Pace",58]],
-    loadout:{"Trail Snack":"Energy drink, room temp","Signature Move":"Hikes in all black","Pack Weight":"A hoodie in July","Catch Phrase":"“Whatever. Let's go.”"} },
+    loadout:{"Trail Snack":"Energy drink, room temp","Signature Move":"Hikes in all black","Pack Weight":"A hoodie in July","Catch Phrase":"“Whatever. Let’s go.”"} },
 
   { name:"Andrew", call:"BOULDER", cls:"Powerhouse", tier:"gold", lvl:67, char:"andrew",
     quote:"This is just leg day with a view.",
@@ -636,8 +636,10 @@ function icHTML(ic){
   return'<div class="sun" style="top:4px;left:3px;width:14px;height:14px"></div><div class="cloud" style="bottom:5px;left:7px"></div>';
 }
 document.getElementById('wx').innerHTML=WX.map(w=>
-  '<div class="wxday'+(w.hike?' hike':'')+'">'+(w.hike?'<div class="flag">Summit Day</div>':'')+
-  '<div class="d">'+w.d+'</div>'+'<div class="ic">'+icHTML(w.ic)+'</div>'+
+  '<div class="wxday'+(w.hike?' hike':'')+'">'+
+  (w.hike?'<div class="flag">Summit Day</div>':'')+
+  '<div class="d">'+w.d+'</div>'+
+  '<div class="ic">'+icHTML(w.ic)+'</div>'+
   '<div class="temp">'+w.hi+'&deg;<small> / '+w.lo+'&deg;</small></div>'+
   '<div class="cond">'+w.cond+'</div></div>').join('');
 
@@ -703,7 +705,7 @@ function renderBook(){
   book.innerHTML=PROPS.map(p=>{
     const chips=HIKERS.map((h,i)=>{
       const t=TIER[h.tier],picked=VOTES[p.id]===i;
-      return'<div class="chip'+(picked?' picked':'')'+'" data-prop="'+p.id+'" data-i="'+i+'" style="--tier:'+t.c+'" title="'+h.name+'" aria-label="Pick '+h.name+'">'+h.name[0]+'</div>';
+      return'<div class="chip'+(picked?' picked':'')+'" data-prop="'+p.id+'" data-i="'+i+'" style="--tier:'+t.c+'" title="'+h.name+'" aria-label="Pick '+h.name+'">'+h.name[0]+'</div>';
     }).join('');
     const pn=VOTES[p.id]!=null?HIKERS[VOTES[p.id]].name:null;
     return'<div class="bet"><div class="q">'+p.q+'</div><div class="fav">House fav: <b>'+HIKERS[p.fav].name+'</b> &nbsp;'+p.odds+'</div><div class="chips">'+chips+'</div><div class="pick">'+(pn?'Your pick: <b>'+pn+'</b> — locked':'Tap a hiker to lock your pick')+'</div></div>';
