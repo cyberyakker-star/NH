@@ -421,6 +421,8 @@ function select(i){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     panel.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%');
   }));
+  // skip scroll on initial auto-select
+  if(document.readyState==='complete') panel.scrollIntoView({behavior:'smooth',block:'start'});
   let roastIdx = -1;
   document.getElementById('roast-btn').addEventListener('click', function(){
     roastIdx = (roastIdx + 1) % h.roasts.length;
