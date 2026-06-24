@@ -127,7 +127,7 @@
   .lo .ic{font-size:26px;line-height:1;margin-bottom:4px}
   .lo .k{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--bone-dim);margin-bottom:2px}
   .lo .v{font-size:11px;font-weight:600;color:var(--bone);line-height:1.2}
-  .roast-wrap{margin-top:18px}
+  .roast-wrap{margin-top:18px;margin-bottom:24px}
   .roast-btn{width:100%;font-family:'Anton',sans-serif;font-size:16px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid #ff3333;color:#ff3333;padding:10px 16px;border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
   .roast-btn:hover{background:#ff3333;color:#fff}
   .roast-box{margin-top:10px;border-left:3px solid #ff3333;padding:8px 12px;font-size:15px;font-style:italic;color:var(--bone);background:rgba(255,51,51,.06);border-radius:0 4px 4px 0;min-height:0;display:none}
@@ -398,7 +398,6 @@ function select(i){
   const stats = h.stats.map(s=>
     '<div class="stat"><div class="row"><span>'+s[0]+'</span><span class="v">'+s[1]+'</span></div>'+
     '<div class="bar"><i data-w="'+s[1]+'"></i></div></div>').join('');
-  const lo = h.loadout.map(x=>'<div class="lo"><div class="ic">'+x.ic+'</div><div class="k">'+x.k+'</div><div class="v">'+x.v+'</div></div>').join('');
   panel.style.setProperty('--tier', t.c);
   panel.innerHTML =
     '<div class="p-left">'+
@@ -416,7 +415,6 @@ function select(i){
         '<div class="roast-box" id="roast-box"></div>'+
       '</div>'+
       '<div class="blk"><div class="blk-title">Stat Block</div>'+stats+'</div>'+
-      '<div class="loadout" style="margin-top:12px">'+lo+'</div>'+
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     panel.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%');
   }));
