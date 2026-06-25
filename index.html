@@ -391,103 +391,94 @@ HIKERS.forEach((h,i)=>{
 
 /* ---- card canvas renderer ---- */
 function drawCard(h, t, roastText, callback){
-  const W=500, S=2, PAD=20;
-  const cv=document.createElement('canvas');
-  // measure roast lines first so we know total height
+  const W=500, S=2, PAD=24;
   const tmp=document.createElement('canvas').getContext('2d');
-  const BODY_FONT='15px "Barlow Semi Condensed",sans-serif';
-  tmp.font=BODY_FONT;
-  function measureLines(text,maxW){
+  function wrap(ctx2,text,maxW){
     const words=text.split(' '); const lines=[]; let line='';
-    for(const w of words){
-      const test=line+(line?' ':'')+w;
-      if(tmp.measureText(test).width>maxW&&line){lines.push(line);line=w;}
-      else line=test;
-    }
-    if(line) lines.push(line);
-    return lines;
+    for(const w of words){const test=line+(line?' ':'')+w;if(ctx2.measureText(test).width>maxW&&line){lines.push(line);line=w;}else line=test;}
+    if(line) lines.push(line); return lines;
   }
-  const PHOTO_H=340, CONTENT_W=W-PAD*2;
-  const quoteLines=measureLines('"'+h.quote+'"',CONTENT_W-14);
-  const roastLines=roastText ? measureLines(roastText,CONTENT_W-14) : [];
-  const STAT_H=h.stats.length*32+24;
-  const QUOTE_H=quoteLines.length*22+28;
-  const ROAST_H=roastText ? roastLines.length*22+28 : 0;
-  const H=PHOTO_H+16+44+20+22+QUOTE_H+14+24+ROAST_H+STAT_H+36;
+  const CW=W-PAD*2;
+  tmp.font='italic 15px "Barlow Semi Condensed",sans-serif';
+  const roastLines=roastText?wrap(tmp,roastText,CW-16):[];
+  const PHOTO_H=400;
+  const ROAST_H=roastText?roastLines.length*22+32:0;
+  const STAT_H=h.stats.length*30+32;
+  const H=PHOTO_H+70+ROAST_H+STAT_H+40;
+  const cv=document.createElement('canvas');
   cv.width=W*S; cv.height=H*S;
   const ctx=cv.getContext('2d');
   ctx.scale(S,S);
-  function drawWrapped(lines,x,y,lineH){
-    lines.forEach(l=>{ctx.fillText(l,x,y);y+=lineH;}); return y;
-  }
   function render(photo){
-    ctx.fillStyle='#0d1a12'; ctx.fillRect(0,0,W,H);
-    // full-width photo
+    // dark bg
+    ctx.fillStyle='#090f0c'; ctx.fillRect(0,0,W,H);
+    // photo full bleed
     if(photo){
-      const iw=photo.naturalWidth||photo.width, ih=photo.naturalHeight||photo.height;
-      const scale=Math.max(W/iw, PHOTO_H/ih);
-      const dw=iw*scale, dh=ih*scale;
+      const iw=photo.naturalWidth||photo.width||1, ih=photo.naturalHeight||photo.height||1;
+      const sc=Math.max(W/iw,PHOTO_H/ih);
       ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,PHOTO_H); ctx.clip();
-      ctx.drawImage(photo,(W-dw)/2,0,dw,dh); ctx.restore();
-    } else {
-      ctx.fillStyle='#1e3328'; ctx.fillRect(0,0,W,PHOTO_H);
-    }
-    // callsign top-left over photo
+      ctx.drawImage(photo,(W-iw*sc)/2,0,iw*sc,ih*sc); ctx.restore();
+    } else { ctx.fillStyle='#1e3328'; ctx.fillRect(0,0,W,PHOTO_H); }
+    // gradient fade photo→bg
+    const fade=ctx.createLinearGradient(0,PHOTO_H-120,0,PHOTO_H);
+    fade.addColorStop(0,'rgba(9,15,12,0)'); fade.addColorStop(1,'rgba(9,15,12,1)');
+    ctx.fillStyle=fade; ctx.fillRect(0,PHOTO_H-120,W,120);
+    // tier color glow bar at very top
+    ctx.fillStyle=t.c; ctx.fillRect(0,0,W,4);
+    // callsign — top left over photo
+    ctx.save();
+    ctx.fillStyle='rgba(9,15,12,0.7)'; ctx.fillRect(0,0,W,32);
     ctx.fillStyle=t.c; ctx.font='11px "Space Mono",monospace'; ctx.textAlign='left';
-    ctx.fillText(h.call,PAD,PHOTO_H-14);
-    // LV badge top-right over photo
-    const lvTxt='LV  '+h.lvl;
+    ctx.fillText(h.call,PAD,20); ctx.restore();
+    // LV badge — top right
     ctx.font='11px "Space Mono",monospace';
-    const lvW=ctx.measureText(lvTxt).width+16;
-    ctx.fillStyle='rgba(13,26,18,0.85)'; ctx.fillRect(W-lvW-PAD,PHOTO_H-26,lvW,20);
-    ctx.fillStyle=t.c; ctx.fillText(lvTxt,W-lvW-PAD+8,PHOTO_H-12);
-    // bottom photo fade
-    const fade=ctx.createLinearGradient(0,PHOTO_H-40,0,PHOTO_H);
-    fade.addColorStop(0,'rgba(13,26,18,0)'); fade.addColorStop(1,'rgba(13,26,18,1)');
-    ctx.fillStyle=fade; ctx.fillRect(0,PHOTO_H-40,W,40);
-    let y=PHOTO_H+16;
-    // name
-    ctx.fillStyle='#e8dcc8'; ctx.font='bold 38px "Anton",sans-serif'; ctx.textAlign='left';
-    ctx.fillText(h.name.toUpperCase(),PAD,y+32); y+=44;
-    // class
-    ctx.fillStyle='#7a9a88'; ctx.font='13px "Barlow Semi Condensed",sans-serif';
-    ctx.fillText(h.cls,PAD,y+14); y+=20;
-    // quote block with left border
-    y+=10;
-    ctx.fillStyle='#1e3328'; ctx.fillRect(PAD,y,3,QUOTE_H-8);
-    ctx.fillStyle='#9aaa96'; ctx.font='italic '+BODY_FONT;
-    drawWrapped(quoteLines,PAD+12,y+16,22); y+=QUOTE_H;
-    // tier tag
-    ctx.fillStyle=t.c+'22'; ctx.fillRect(PAD,y,CONTENT_W,22);
-    ctx.strokeStyle=t.c+'55'; ctx.lineWidth=1; ctx.strokeRect(PAD,y,CONTENT_W,22);
-    ctx.fillStyle=t.c; ctx.font='10px "Space Mono",monospace';
-    ctx.fillText('■  '+t.label.toUpperCase()+'   ·   '+t.rank.toUpperCase(),PAD+8,y+14); y+=36;
-    // roast block
+    const lvTxt='LV '+h.lvl, lvW=ctx.measureText(lvTxt).width+20;
+    ctx.fillStyle='rgba(9,15,12,0.85)'; ctx.fillRect(W-lvW-12,8,lvW,20);
+    ctx.fillStyle=t.c; ctx.textAlign='right'; ctx.fillText(lvTxt,W-12-4,21); ctx.textAlign='left';
+    // name overlapping photo bottom — huge, with glow
+    ctx.save();
+    ctx.shadowColor=t.c; ctx.shadowBlur=18;
+    ctx.fillStyle='#ffffff'; ctx.font='bold 54px "Anton",sans-serif';
+    ctx.fillText(h.name.toUpperCase(),PAD,PHOTO_H-16);
+    ctx.restore();
+    // class + tier inline
+    let y=PHOTO_H+14;
+    ctx.fillStyle='#7a9a88'; ctx.font='500 13px "Barlow Semi Condensed",sans-serif';
+    ctx.fillText(h.cls.toUpperCase(),PAD,y);
+    ctx.fillStyle=t.c; ctx.font='500 13px "Barlow Semi Condensed",sans-serif';
+    ctx.fillText('  ·  '+t.label.toUpperCase()+' / '+t.rank.toUpperCase(),PAD+ctx.measureText(h.cls.toUpperCase()).width,y);
+    y+=2;
+    // tier color rule
+    ctx.fillStyle=t.c; ctx.fillRect(PAD,y+6,CW,2); y+=18;
+    // roast box
     if(roastText){
-      ctx.fillStyle='#1e1008'; ctx.fillRect(PAD,y,CONTENT_W,ROAST_H-8);
-      ctx.fillStyle='#ff3333'; ctx.fillRect(PAD,y,3,ROAST_H-8);
-      ctx.fillStyle='#e8a060'; ctx.font='italic '+BODY_FONT;
-      drawWrapped(roastLines,PAD+12,y+16,22); y+=ROAST_H;
+      ctx.fillStyle='#0f1a10'; ctx.fillRect(PAD,y,CW,ROAST_H-8);
+      ctx.fillStyle=t.c; ctx.fillRect(PAD,y,3,ROAST_H-8);
+      ctx.fillStyle='#e8dcc8'; ctx.font='italic 15px "Barlow Semi Condensed",sans-serif';
+      roastLines.forEach((l,i)=>{ctx.fillText(l,PAD+14,y+18+i*22);});
+      y+=ROAST_H;
     }
-    // stat block
-    ctx.fillStyle='#4a6358'; ctx.font='10px "Space Mono",monospace';
-    ctx.fillText('STAT BLOCK',PAD,y+12);
-    ctx.fillStyle='#1e3328'; ctx.fillRect(PAD+82,y+7,CONTENT_W-82,1); y+=24;
+    // stat block header
+    ctx.fillStyle='#3a5448'; ctx.font='10px "Space Mono",monospace';
+    ctx.fillText('STAT BLOCK',PAD,y+14);
+    ctx.fillStyle='#1e3328'; ctx.fillRect(PAD+84,y+8,CW-84,1); y+=26;
+    // stats
     h.stats.forEach(s=>{
-      ctx.fillStyle='#c8c0a8'; ctx.font='13px "Barlow Semi Condensed",sans-serif'; ctx.textAlign='left';
-      ctx.fillText(s[0],PAD,y+14);
-      ctx.fillStyle=t.c; ctx.font='bold 13px "Space Mono",monospace'; ctx.textAlign='right';
-      ctx.fillText(s[1],W-PAD,y+14);
-      ctx.textAlign='left';
-      ctx.fillStyle='#1e3328'; ctx.fillRect(PAD,y+18,CONTENT_W,6);
-      ctx.fillStyle=t.c; ctx.fillRect(PAD,y+18,CONTENT_W*(s[1]/100),6);
-      y+=32;
+      const val=Number(s[1])||0;
+      ctx.fillStyle='#c8c0a8'; ctx.font='600 14px "Barlow Semi Condensed",sans-serif'; ctx.textAlign='left';
+      ctx.fillText(s[0],PAD,y+13);
+      ctx.fillStyle=t.c; ctx.font='bold 12px "Space Mono",monospace'; ctx.textAlign='right';
+      ctx.fillText(val,W-PAD,y+13); ctx.textAlign='left';
+      ctx.fillStyle='#1a2e20'; ctx.fillRect(PAD,y+17,CW,7);
+      ctx.fillStyle=t.c; ctx.fillRect(PAD,y+17,Math.round(CW*val/100),7);
+      y+=30;
     });
-    // footer url
-    y+=8;
-    ctx.fillStyle='#1e3328'; ctx.fillRect(0,y,W,1); y+=1;
+    // bottom rule + url
+    y+=6; ctx.fillStyle='#1e3328'; ctx.fillRect(0,y,W,1); y+=12;
     ctx.fillStyle='#2a4034'; ctx.font='10px "Space Mono",monospace'; ctx.textAlign='center';
-    ctx.fillText('cyberyakker-star.github.io/NH',W/2,y+18);
+    ctx.fillText('cyberyakker-star.github.io/NH',W/2,y+10);
+    // bottom tier bar
+    ctx.fillStyle=t.c; ctx.fillRect(0,H-4,W,4);
     cv.toBlob(callback,'image/png');
   }
   const srcMatch=CHARS[h.char].match(/src="([^"]+)"/);
