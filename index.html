@@ -391,47 +391,107 @@ HIKERS.forEach((h,i)=>{
 
 /* ---- card canvas renderer ---- */
 function drawCard(h, t, roastText, callback){
-  const W=480, H=660;
-  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const W=500, S=2; // logical width, pixel scale
+  const cv=document.createElement('canvas');
+  // calculate height dynamically based on content
+  const roastLines=[];
+  if(roastText){
+    const tmp=document.createElement('canvas').getContext('2d');
+    tmp.font='14px "Barlow Semi Condensed", sans-serif';
+    const words=roastText.split(' '), maxW=(W-64)*S;
+    let line='';
+    for(const w of words){
+      const test=line+(line?' ':'')+w;
+      if(tmp.measureText(test).width>maxW&&line){roastLines.push(line);line=w;}
+      else line=test;
+    }
+    if(line) roastLines.push(line);
+  }
+  const H=roastText ? 760+roastLines.length*22 : 680;
+  cv.width=W*S; cv.height=H*S;
   const ctx=cv.getContext('2d');
+  ctx.scale(S,S);
+  function wrapText(text,x,y,maxW,lineH){
+    const words=text.split(' '); let line='';
+    for(const w of words){
+      const test=line+(line?' ':'')+w;
+      if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,x,y);line=w;y+=lineH;}
+      else line=test;
+    }
+    if(line) ctx.fillText(line,x,y);
+    return y;
+  }
   function render(photo){
+    // bg
     ctx.fillStyle='#0b1a12'; ctx.fillRect(0,0,W,H);
-    // border
-    ctx.strokeStyle=t.c; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);
-    // site label
-    ctx.fillStyle='#2a4034'; ctx.font='10px monospace'; ctx.textAlign='center';
-    ctx.fillText('SQUAD LOCKER — FRANCONIA RIDGE 2026',W/2,22);
-    // callsign
-    ctx.fillStyle=t.c; ctx.font='bold 26px monospace'; ctx.fillText(h.call,W/2,54);
-    // photo
-    const PW=200,PH=240,PX=(W-PW)/2,PY=66;
+    // tier accent bar top
+    ctx.fillStyle=t.c; ctx.fillRect(0,0,W,4);
+    // header label
+    ctx.fillStyle='#2a4034'; ctx.font='10px "Space Mono", monospace';
+    ctx.textAlign='center';
+    ctx.fillText('SQUAD LOCKER  ·  FRANCONIA RIDGE  ·  JUN 2026',W/2,24);
+    // horizontal rule
+    ctx.fillStyle='#1e3328'; ctx.fillRect(24,32,W-48,1);
+    // left column: photo at top-left
+    const PX=24, PY=46, PW=180, PH=220;
     if(photo){
       ctx.save(); ctx.beginPath(); ctx.rect(PX,PY,PW,PH); ctx.clip();
       ctx.drawImage(photo,PX,PY,PW,PH); ctx.restore();
+    } else {
+      ctx.fillStyle='#1e3328'; ctx.fillRect(PX,PY,PW,PH);
     }
-    ctx.strokeStyle=t.c+'88'; ctx.lineWidth=1; ctx.strokeRect(PX,PY,PW,PH);
+    ctx.strokeStyle=t.c+'66'; ctx.lineWidth=1; ctx.strokeRect(PX,PY,PW,PH);
+    // callsign over photo bottom
+    ctx.fillStyle='rgba(11,26,18,0.75)'; ctx.fillRect(PX,PY+PH-28,PW,28);
+    ctx.fillStyle=t.c; ctx.font='bold 14px "Space Mono", monospace';
+    ctx.textAlign='center';
+    ctx.fillText(h.call,PX+PW/2,PY+PH-10);
+    // right column
+    const RX=PX+PW+16, RW=W-RX-16;
+    ctx.textAlign='left';
+    // level badge
+    ctx.fillStyle='#1e3328'; ctx.fillRect(RX,PY,RW,22);
+    ctx.fillStyle='#4a6358'; ctx.font='10px "Space Mono", monospace';
+    ctx.fillText('LV  '+h.lvl,RX+8,PY+14);
     // name
-    ctx.fillStyle='#e8dcc8'; ctx.font='bold 30px sans-serif'; ctx.fillText(h.name.toUpperCase(),W/2,PY+PH+34);
+    ctx.fillStyle='#e8dcc8'; ctx.font='bold 26px "Anton", sans-serif';
+    ctx.fillText(h.name.toUpperCase(),RX,PY+52);
     // class
-    ctx.fillStyle='#7a9a88'; ctx.font='12px monospace'; ctx.fillText(h.cls,W/2,PY+PH+54);
-    // tier
-    ctx.fillStyle=t.c; ctx.font='11px monospace';
-    ctx.fillText('● '+t.label.toUpperCase()+' · '+t.rank.toUpperCase(),W/2,PY+PH+74);
+    ctx.fillStyle='#7a9a88'; ctx.font='12px "Space Mono", monospace';
+    ctx.fillText(h.cls,RX,PY+70);
+    // tier tag
+    ctx.fillStyle=t.c+'33'; ctx.fillRect(RX,PY+80,RW,20);
+    ctx.strokeStyle=t.c+'66'; ctx.lineWidth=1; ctx.strokeRect(RX,PY+80,RW,20);
+    ctx.fillStyle=t.c; ctx.font='10px "Space Mono", monospace';
+    ctx.fillText('● '+t.label.toUpperCase()+'  ·  '+t.rank.toUpperCase(),RX+6,PY+93);
+    // stat bars
+    let sy=PY+118;
+    ctx.font='10px "Space Mono", monospace';
+    h.stats.forEach(s=>{
+      ctx.fillStyle='#4a6358'; ctx.fillText(s[0].toUpperCase(),RX,sy);
+      ctx.fillStyle='#e8dcc8'; ctx.textAlign='right'; ctx.fillText(s[1],RX+RW,sy); ctx.textAlign='left';
+      ctx.fillStyle='#1e3328'; ctx.fillRect(RX,sy+4,RW,6);
+      ctx.fillStyle=t.c+'bb'; ctx.fillRect(RX,sy+4,RW*(s[1]/100),6);
+      sy+=22;
+    });
+    // divider
+    const divY=Math.max(PY+PH,sy)+12;
+    ctx.fillStyle='#1e3328'; ctx.fillRect(24,divY,W-48,1);
     // roast
+    let footY=divY+20;
     if(roastText){
-      ctx.fillStyle='#c0a060'; ctx.font='italic 13px serif';
-      const words=('"'+roastText+'"').split(' ');
-      let line='', y=PY+PH+102, maxW=W-60;
-      for(const w of words){
-        const test=line+(line?' ':'')+w;
-        if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,W/2,y);line=w;y+=20;}
-        else line=test;
-      }
-      if(line) ctx.fillText(line,W/2,y);
+      ctx.fillStyle='#1e3328'; ctx.fillRect(24,footY,W-48,roastLines.length*22+24);
+      ctx.fillStyle='#c0a060'; ctx.font='italic 14px "Barlow Semi Condensed", sans-serif';
+      ctx.textAlign='left';
+      roastLines.forEach((line,i)=>ctx.fillText('"'[+!i]+line+(i===roastLines.length-1?'"':''),36,footY+18+i*22));
+      footY+=roastLines.length*22+36;
     }
-    // url
-    ctx.fillStyle='#2a4034'; ctx.font='10px monospace';
+    // url footer
+    ctx.fillStyle='#2a4034'; ctx.font='10px "Space Mono", monospace';
+    ctx.textAlign='center';
     ctx.fillText('cyberyakker-star.github.io/NH',W/2,H-14);
+    // bottom tier bar
+    ctx.fillStyle=t.c; ctx.fillRect(0,H-4,W,4);
     cv.toBlob(callback,'image/png');
   }
   const srcMatch=CHARS[h.char].match(/src="([^"]+)"/);
