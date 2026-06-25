@@ -428,7 +428,7 @@ function drawCard(h, t, roastText, callback){
       const scale=Math.max(W/iw, PHOTO_H/ih);
       const dw=iw*scale, dh=ih*scale;
       ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,PHOTO_H); ctx.clip();
-      ctx.drawImage(photo,(W-dw)/2,(PHOTO_H-dh)/2,dw,dh); ctx.restore();
+      ctx.drawImage(photo,(W-dw)/2,0,dw,dh); ctx.restore();
     } else {
       ctx.fillStyle='#1e3328'; ctx.fillRect(0,0,W,PHOTO_H);
     }
