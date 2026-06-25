@@ -421,6 +421,14 @@ function select(i){
   }));
   // skip scroll on initial auto-select
   if(document.readyState==='complete') panel.scrollIntoView({behavior:'smooth',block:'start'});
+  // pre-render card to blob so share() can fire synchronously (iOS user-gesture requirement)
+  let cardBlob = null;
+  const SHARE_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+  setTimeout(()=>{
+    html2canvas(document.getElementById('panel'), {
+      backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
+    }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; },'image/png')).catch(()=>{});
+  }, 400);
   let roastIdx = -1;
   document.getElementById('roast-btn').addEventListener('click', function(){
     roastIdx = (roastIdx + 1) % h.roasts.length;
@@ -431,31 +439,22 @@ function select(i){
   });
   document.getElementById('share-btn').addEventListener('click', function(){
     const btn = this;
-    btn.textContent = 'Capturing…';
-    btn.disabled = true;
-    html2canvas(document.getElementById('panel'), {
-      backgroundColor: '#0b1a12',
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      logging: false
-    }).then(canvas => {
-      canvas.toBlob(blob => {
-        const file = new File([blob], h.name+'-card.png', {type:'image/png'});
-        if(navigator.canShare && navigator.canShare({files:[file]})){
-          navigator.share({files:[file], title:'Squad Locker — '+h.name}).catch(()=>{});
-        } else if(navigator.share){
-          navigator.share({title:'Squad Locker — '+h.name, url:'https://cyberyakker-star.github.io/NH'}).catch(()=>{});
-        } else {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = h.name+'-card.png';
-          a.click();
-        }
-        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share';
-        btn.disabled = false;
-      }, 'image/png');
-    }).catch(()=>{ btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share'; btn.disabled = false; });
+    if(!cardBlob){
+      // blob not ready yet — fall back to URL share
+      if(navigator.share) navigator.share({title:'Squad Locker — '+h.name, url:'https://cyberyakker-star.github.io/NH'}).catch(()=>{});
+      return;
+    }
+    const file = new File([cardBlob], h.name+'-card.png', {type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file], title:h.name+' — Squad Locker'}).catch(()=>{});
+    } else if(navigator.share){
+      navigator.share({title:'Squad Locker — '+h.name, url:'https://cyberyakker-star.github.io/NH'}).catch(()=>{});
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(cardBlob);
+      a.download = h.name+'-card.png';
+      a.click();
+    }
   });
 }
 
