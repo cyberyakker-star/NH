@@ -25,6 +25,11 @@
   .hud b{color:var(--blaze)}
   .hud .pip{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--t-green);margin-right:7px;box-shadow:0 0 8px var(--t-green)}
 
+  /* NAV BUTTONS */
+  .section-nav{display:flex;justify-content:center;gap:10px;padding:18px 0 0;flex-wrap:wrap}
+  .nav-btn{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--bone-dim);border:1px solid var(--line);background:transparent;padding:9px 22px;border-radius:4px;cursor:pointer;transition:color .15s,border-color .15s,background .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .nav-btn:hover,.nav-btn:active{color:var(--bone);border-color:var(--blaze);background:rgba(255,107,53,.07)}
+
   /* HERO */
   .hero{position:relative;padding:36px 0 18px;text-align:center}
   .eyebrow{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--blaze);margin-bottom:12px}
@@ -196,6 +201,11 @@
   </div>
 
   <header class="hero">
+    <div class="section-nav">
+      <button class="nav-btn" onclick="document.querySelector('.roster-section').scrollIntoView({behavior:'smooth'})">Roster</button>
+      <button class="nav-btn" onclick="document.querySelector('.map-section').scrollIntoView({behavior:'smooth'})">Route</button>
+      <button class="nav-btn" onclick="document.querySelector('.odds-section').scrollIntoView({behavior:'smooth'})">Odds</button>
+    </div>
     <div class="eyebrow">Character Select</div>
     <h1>Select Your<br>Hiker</h1>
     <p class="sub">Six legends. One ridge. Three summits, zero guarantees. Tap a slot to study the field.</p>
