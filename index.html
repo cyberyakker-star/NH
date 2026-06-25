@@ -223,7 +223,7 @@
       <div class="opcard">
         <div class="lab">Forecast &mdash; Franconia Notch</div>
         <div class="wx" id="wx"></div>
-        <div class="wxnote">// placeholder &mdash; update from mountain-forecast before departure</div>
+        
       </div>
     </div>
   </header>
@@ -410,26 +410,56 @@ function tick(){
 }
 tick(); setInterval(tick,1000);
 
-/* ---- weather ---- */
-const WX = [
-  {d:"Sat 6/27",ic:"sun",hi:74,lo:52,cond:"Sunny"},
-  {d:"Sun 6/28",ic:"sun-cloud",hi:68,lo:46,cond:"Mostly sun",hike:true},
-  {d:"Mon 6/29",ic:"cloud",hi:66,lo:50,cond:"Clouds"},
-  {d:"Tue 6/30",ic:"rain",hi:61,lo:48,cond:"Showers"},
-];
-function icHTML(ic){
-  if(ic==="sun")return'<div class="sun"></div>';
-  if(ic==="cloud")return'<div class="cloud" style="bottom:9px"></div>';
-  if(ic==="rain")return'<div class="cloud" style="bottom:11px"></div><div class="rain"></div>';
-  return'<div class="sun" style="top:4px;left:3px;width:14px;height:14px"></div><div class="cloud" style="bottom:5px;left:7px"></div>';
+/* ---- weather (live Open-Meteo) ---- */
+function icHTML(code){
+  // WMO weather code → icon type
+  if(code<=1)return'<div class="sun"></div>';
+  if(code<=3)return'<div class="sun" style="top:4px;left:3px;width:14px;height:14px"></div><div class="cloud" style="bottom:5px;left:7px"></div>';
+  if(code<=48)return'<div class="cloud" style="bottom:9px"></div>';
+  if(code<=67||code<=77)return'<div class="cloud" style="bottom:11px"></div><div class="rain"></div>';
+  if(code<=82)return'<div class="cloud" style="bottom:11px"></div><div class="rain"></div>';
+  return'<div class="cloud" style="bottom:11px"></div><div class="rain"></div>';
 }
-document.getElementById('wx').innerHTML=WX.map(w=>
-  '<div class="wxday'+(w.hike?' hike':'')+'">'+
-  (w.hike?'<div class="flag">Summit Day</div>':'')+
-  '<div class="d">'+w.d+'</div>'+
-  '<div class="ic">'+icHTML(w.ic)+'</div>'+
-  '<div class="temp">'+w.hi+'&deg;<small> / '+w.lo+'&deg;</small></div>'+
-  '<div class="cond">'+w.cond+'</div></div>').join('');
+function condLabel(code){
+  if(code===0)return'Clear';
+  if(code<=1)return'Mostly clear';
+  if(code<=2)return'Partly cloudy';
+  if(code<=3)return'Overcast';
+  if(code<=48)return'Fog';
+  if(code<=55)return'Drizzle';
+  if(code<=65)return'Rain';
+  if(code<=77)return'Snow';
+  if(code<=82)return'Showers';
+  if(code<=99)return'Thunderstorm';
+  return'Mixed';
+}
+(function(){
+  const DATES=['2026-06-27','2026-06-28','2026-06-29','2026-06-30'];
+  const LABELS=['Sat 6/27','Sun 6/28','Mon 6/29','Tue 6/30'];
+  const HIKE_DATE='2026-06-28';
+  const wxEl=document.getElementById('wx');
+  wxEl.innerHTML='<div style="grid-column:1/-1;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;padding:10px 0">Loading forecast...</div>';
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=44.14&longitude=-71.68&daily=temperature_2m_max,temperature_2m_min,weathercode&temperature_unit=fahrenheit&timezone=America%2FNew_York&start_date=2026-06-27&end_date=2026-06-30')
+    .then(r=>r.json())
+    .then(data=>{
+      const days=data.daily;
+      wxEl.innerHTML=DATES.map((date,i)=>{
+        const hi=Math.round(days.temperature_2m_max[i]);
+        const lo=Math.round(days.temperature_2m_min[i]);
+        const code=days.weathercode[i];
+        const hike=date===HIKE_DATE;
+        return'<div class="wxday'+(hike?' hike':'')+'">'+
+          (hike?'<div class="flag">Summit Day</div>':'')+
+          '<div class="d">'+LABELS[i]+'</div>'+
+          '<div class="ic">'+icHTML(code)+'</div>'+
+          '<div class="temp">'+hi+'&deg;<small> / '+lo+'&deg;</small></div>'+
+          '<div class="cond">'+condLabel(code)+'</div></div>';
+      }).join('');
+    })
+    .catch(()=>{
+      wxEl.innerHTML='<div style="grid-column:1/-1;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;padding:10px 0">// forecast unavailable offline</div>';
+    });
+})();
 
 /* ---- elevation ---- */
 const WP=[
@@ -570,7 +600,6 @@ oddsBoard.innerHTML=ODDS.map(m=>{
 })();
 /* ───────────────────────────────────────────────────── */
 
-select(0);
 </script>
 </body>
 </html>
