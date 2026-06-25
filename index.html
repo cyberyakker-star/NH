@@ -202,7 +202,6 @@
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -390,6 +389,56 @@ HIKERS.forEach((h,i)=>{
   roster.appendChild(el);
 });
 
+/* ---- card canvas renderer ---- */
+function drawCard(h, t, roastText, callback){
+  const W=480, H=660;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  function render(photo){
+    ctx.fillStyle='#0b1a12'; ctx.fillRect(0,0,W,H);
+    // border
+    ctx.strokeStyle=t.c; ctx.lineWidth=2; ctx.strokeRect(1,1,W-2,H-2);
+    // site label
+    ctx.fillStyle='#2a4034'; ctx.font='10px monospace'; ctx.textAlign='center';
+    ctx.fillText('SQUAD LOCKER — FRANCONIA RIDGE 2026',W/2,22);
+    // callsign
+    ctx.fillStyle=t.c; ctx.font='bold 26px monospace'; ctx.fillText(h.call,W/2,54);
+    // photo
+    const PW=200,PH=240,PX=(W-PW)/2,PY=66;
+    if(photo){
+      ctx.save(); ctx.beginPath(); ctx.rect(PX,PY,PW,PH); ctx.clip();
+      ctx.drawImage(photo,PX,PY,PW,PH); ctx.restore();
+    }
+    ctx.strokeStyle=t.c+'88'; ctx.lineWidth=1; ctx.strokeRect(PX,PY,PW,PH);
+    // name
+    ctx.fillStyle='#e8dcc8'; ctx.font='bold 30px sans-serif'; ctx.fillText(h.name.toUpperCase(),W/2,PY+PH+34);
+    // class
+    ctx.fillStyle='#7a9a88'; ctx.font='12px monospace'; ctx.fillText(h.cls,W/2,PY+PH+54);
+    // tier
+    ctx.fillStyle=t.c; ctx.font='11px monospace';
+    ctx.fillText('● '+t.label.toUpperCase()+' · '+t.rank.toUpperCase(),W/2,PY+PH+74);
+    // roast
+    if(roastText){
+      ctx.fillStyle='#c0a060'; ctx.font='italic 13px serif';
+      const words=('"'+roastText+'"').split(' ');
+      let line='', y=PY+PH+102, maxW=W-60;
+      for(const w of words){
+        const test=line+(line?' ':'')+w;
+        if(ctx.measureText(test).width>maxW&&line){ctx.fillText(line,W/2,y);line=w;y+=20;}
+        else line=test;
+      }
+      if(line) ctx.fillText(line,W/2,y);
+    }
+    // url
+    ctx.fillStyle='#2a4034'; ctx.font='10px monospace';
+    ctx.fillText('cyberyakker-star.github.io/NH',W/2,H-14);
+    cv.toBlob(callback,'image/png');
+  }
+  const srcMatch=CHARS[h.char].match(/src="([^"]+)"/);
+  if(srcMatch){const img=new Image();img.onload=()=>render(img);img.onerror=()=>render(null);img.src=srcMatch[1];}
+  else render(null);
+}
+
 /* ---- detail panel ---- */
 const panel = document.getElementById('panel');
 function select(i){
@@ -421,27 +470,21 @@ function select(i){
   }));
   // skip scroll on initial auto-select
   if(document.readyState==='complete') panel.scrollIntoView({behavior:'smooth',block:'start'});
-  // pre-render card to blob so share() can fire synchronously (iOS user-gesture requirement)
+  // pre-render card blob; updated whenever roast changes
   let cardBlob = null;
+  let currentRoast = '';
   const SHARE_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
-  setTimeout(()=>{
-    html2canvas(document.getElementById('panel'), {
-      backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
-    }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; },'image/png')).catch(()=>{});
-  }, 400);
-  function reRenderBlob(){
-    html2canvas(document.getElementById('panel'), {
-      backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
-    }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; },'image/png')).catch(()=>{});
-  }
+  function reRenderBlob(){ drawCard(h, t, currentRoast, blob=>{ cardBlob=blob; }); }
+  setTimeout(reRenderBlob, 300);
   let roastIdx = -1;
   document.getElementById('roast-btn').addEventListener('click', function(){
     roastIdx = (roastIdx + 1) % h.roasts.length;
+    currentRoast = h.roasts[roastIdx];
     const box = document.getElementById('roast-box');
-    box.textContent = h.roasts[roastIdx];
+    box.textContent = currentRoast;
     box.classList.add('show');
     this.textContent = roastIdx < h.roasts.length - 1 ? '🔥 Hit \'em again' : '🔥 Back to the top';
-    setTimeout(reRenderBlob, 100);
+    reRenderBlob();
   });
   document.getElementById('share-btn').addEventListener('click', function(){
     const btn = this;
@@ -450,25 +493,13 @@ function select(i){
       if(navigator.canShare && navigator.canShare({files:[file]})){
         navigator.share({files:[file], title:h.name+' — Squad Locker'}).catch(()=>{});
       } else {
-        // download as fallback
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = h.name+'-card.png';
-        a.click();
+        const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+        a.download=h.name+'-card.png'; a.click();
       }
-      btn.innerHTML = SHARE_SVG+' Share';
-      btn.disabled = false;
+      btn.innerHTML=SHARE_SVG+' Share'; btn.disabled=false;
     }
-    if(cardBlob){
-      doShare(cardBlob);
-    } else {
-      btn.innerHTML = SHARE_SVG+' Capturing…';
-      btn.disabled = true;
-      html2canvas(document.getElementById('panel'), {
-        backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
-      }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; doShare(blob); },'image/png'))
-        .catch(()=>{ btn.innerHTML=SHARE_SVG+' Share'; btn.disabled=false; });
-    }
+    if(cardBlob){ doShare(cardBlob); }
+    else { drawCard(h, t, currentRoast, blob=>{ cardBlob=blob; doShare(blob); }); }
   });
 }
 
