@@ -188,6 +188,12 @@
   .mkt-line.fav-line .mkt-odds{color:var(--t-gold)}
   .fav-tag{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--night);background:var(--t-gold);padding:2px 5px;border-radius:3px;margin-left:6px;vertical-align:middle}
 
+  .share-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);background:transparent;color:var(--bone-dim);padding:10px;border-radius:4px;cursor:pointer;margin-top:12px}
+  .share-btn:active{background:rgba(255,255,255,.06)}
+  .share-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a2e22;border:1px solid var(--line);color:var(--bone-dim);font-family:'Space Mono',monospace;font-size:10px;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
+  .share-toast.show{opacity:1}
+  .emergency-footer{margin-top:18px;font-size:9px;letter-spacing:.06em;line-height:1.7;color:#4a6358;max-width:340px;margin-left:auto;margin-right:auto}
+  .emergency-footer a{color:#4a6358;text-decoration:none}
   /* FOOTER */
   .ready{text-align:center;border-top:1px solid var(--line);padding:28px 0 46px;font-family:'Space Mono',monospace;color:var(--bone-dim);font-size:11px;letter-spacing:.2em}
   .ready .btn{display:inline-block;margin-bottom:14px;font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.06em;text-transform:uppercase;color:var(--night);background:var(--blaze);padding:11px 32px;border-radius:4px;box-shadow:0 0 24px -6px var(--blaze)}
@@ -289,9 +295,16 @@
   </section>
 </div>
 
+<div class="share-toast" id="share-toast">Copied to clipboard</div>
+
 <div class="ready">
   <div class="btn">Ready Up</div>
   <div>BOOTS LACED &mdash; PACKS LOADED &mdash; RIDGE AWAITS</div>
+  <div class="emergency-footer">
+    EMERGENCY &mdash; NH Fish &amp; Game: <a href="tel:18008523411">1-800-852-3411</a> &nbsp;&bull;&nbsp; Littleton Hospital: <a href="tel:16034449000">(603) 444-9000</a><br>
+    Trailhead: Lafayette Place Campground, I-93 N Franconia NH &nbsp;&bull;&nbsp; GPS: 44.1394°N 71.6793°W<br>
+    911 first &bull; note coords &bull; don't leave injured alone
+  </div>
 </div>
 
 <script>
@@ -401,6 +414,7 @@ function select(i){
         '<div class="roast-box" id="roast-box"></div>'+
       '</div>'+
       '<div class="blk"><div class="blk-title">Stat Block</div>'+stats+'</div>'+
+      '<button class="share-btn" id="share-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> Share</button>'+
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     panel.querySelectorAll('.bar i').forEach(b=>b.style.width=b.dataset.w+'%');
   }));
@@ -413,6 +427,20 @@ function select(i){
     box.textContent = h.roasts[roastIdx];
     box.classList.add('show');
     this.textContent = roastIdx < h.roasts.length - 1 ? '🔥 Hit \'em again' : '🔥 Back to the top';
+  });
+  document.getElementById('share-btn').addEventListener('click', function(){
+    const roast = h.roasts[0];
+    const text = '"'+h.call+'" — '+h.name+', '+h.cls+'. "'+roast+'" — cyberyakker-star.github.io/NH';
+    const url = 'https://cyberyakker-star.github.io/NH';
+    if(navigator.share){
+      navigator.share({title:'Squad Locker — '+h.name, text:text, url:url}).catch(()=>{});
+    } else {
+      navigator.clipboard.writeText(text+'\n'+url).then(()=>{
+        const t=document.getElementById('share-toast');
+        t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'),2000);
+      }).catch(()=>{});
+    }
   });
 }
 
