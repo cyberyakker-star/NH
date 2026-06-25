@@ -429,6 +429,11 @@ function select(i){
       backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
     }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; },'image/png')).catch(()=>{});
   }, 400);
+  function reRenderBlob(){
+    html2canvas(document.getElementById('panel'), {
+      backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
+    }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; },'image/png')).catch(()=>{});
+  }
   let roastIdx = -1;
   document.getElementById('roast-btn').addEventListener('click', function(){
     roastIdx = (roastIdx + 1) % h.roasts.length;
@@ -436,6 +441,7 @@ function select(i){
     box.textContent = h.roasts[roastIdx];
     box.classList.add('show');
     this.textContent = roastIdx < h.roasts.length - 1 ? '🔥 Hit \'em again' : '🔥 Back to the top';
+    setTimeout(reRenderBlob, 100);
   });
   document.getElementById('share-btn').addEventListener('click', function(){
     const btn = this;
