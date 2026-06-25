@@ -298,13 +298,13 @@ const HIKERS = [
     quote:"Long legs, no excuses. Try to keep up.",
     stats:[["Pace",90],["Endurance",88],["Wingspan",99],["Patience",52]],
     loadout:[{ic:"☕",k:"Snack",v:"Black coffee only"},{ic:"👣",k:"Signature",v:"The 3-ft stride"},{ic:"🪶",k:"Pack Weight",v:"Ultralight flex"},{ic:"💬",k:"Catch Phrase",v:"Basically there"}],
-    roasts:["His arms are so long his hands drag on the ground when he walks. Fully ape. Scientists are interested.","Those legs are 90% shin and 10% whatever powers a helicopter. There is nothing else going on there.","Had to import his girlfriend from another country. America simply did not have what he needed.","Would absolutely suck Elon\\'s dick for a Cybertruck and feel good about it. He\\'d call it networking.","The wingspan on this man is dangerous. He could take out two people on a narrow ridge without even trying."]},
+    roasts:["His arms are so long his hands drag on the ground when he walks. Fully ape. Scientists are interested.","Those legs are 90% shin and 10% whatever powers a helicopter. There is nothing else going on there.","Had to import his girlfriend from another country. America simply did not have what he needed.","Would absolutely suck Elon's dick for a Cybertruck and feel good about it. He'd call it networking.","The wingspan on this man is dangerous. He could take out two people on a narrow ridge without even trying."]},
 
   { name:"Spencer", call:"HUSTLE", cls:"The Operator", tier:"black", lvl:58, char:"spencer",
     quote:"I already monetized this hike. You're the content.",
     stats:[["Strength",95],["Hustle",92],["Leg Day",99],["Pace",55]],
     loadout:[{ic:"💪",k:"Snack",v:"Protein bar (for sale)"},{ic:"📈",k:"Signature",v:"Pitch on the ascent"},{ic:"👕",k:"Pack Weight",v:"Branded merch only"},{ic:"💡",k:"Catch Phrase",v:"Quick idea tho"}],
-    roasts:["Knotted his shirt into a crop top on a mountain summit. A Sergeant. In the United States Army. Did this.","Has a massive badonk for a man in uniform. The Army did not prepare us for this information.","Newly engaged. His future wife has met his mother and still said yes. That woman is either deeply in love or has no internet access.","Runs an IT helpdesk and a dropshipping empire. Somehow the crop top is still the most impressive thing about him.","His mom lit a cellmate\\'s hair on fire in jail. He showed up to a mountain pointing at the camera and crying. The apple does not fall far."]},
+    roasts:["Knotted his shirt into a crop top on a mountain summit. A Sergeant. In the United States Army. Did this.","Has a massive badonk for a man in uniform. The Army did not prepare us for this information.","Newly engaged. His future wife has met his mother and still said yes. That woman is either deeply in love or has no internet access.","Runs an IT helpdesk and a dropshipping empire. Somehow the crop top is still the most impressive thing about him.","His mom lit a cellmate's hair on fire in jail. He showed up to a mountain pointing at the camera and crying. The apple does not fall far."]},
 
   { name:"Tony", call:"CASANOVA", cls:"Morale Officer", tier:"green", lvl:31, char:"tony",
     quote:"The trail's romantic if you squint. Who's pairing up?",
@@ -324,7 +324,7 @@ const HIKERS = [
     loadout:[{ic:"🎸",k:"Snack",v:"Whatever fits"},{ic:"🔥",k:"Signature",v:"Campfire setlist"},{ic:"💧",k:"Pack Weight",v:"Guitar > water"},{ic:"🎤",k:"Catch Phrase",v:"This one's for the trail"}],
     roasts:["Showed up shirtless with dog tags on a mountain summit. Those dog tags are 100% from a mall kiosk and everyone knows it.","Posts singing videos online with the confidence of someone who has never received a single piece of honest feedback.","Camo pants, combat boots, no shirt, dog tags. This is a hike, not a Special Forces audition tape.","A certified pervert who somehow remains universally liked. Scientists cannot explain it.","Will absolutely play an acoustic guitar at the campsite at 11pm. This is not a threat. This is a prophecy."]},
 
-  { name:"Jaden", call:"RAVEN", cls:"Lone Wolf", tier:"black", lvl:53, char:"jaden",
+  { name:"Jadon", call:"RAVEN", cls:"Lone Wolf", tier:"black", lvl:53, char:"jaden",
     quote:"The summit won't fix me, but we'll try it.",
     stats:[["Aux Cord",95],["Brooding",97],["Vibes",70],["Pace",58]],
     loadout:[{ic:"⚡",k:"Snack",v:"Energy drink, warm"},{ic:"🖤",k:"Signature",v:"Full black kit"},{ic:"🥵",k:"Pack Weight",v:"Hoodie in July"},{ic:"😑",k:"Catch Phrase",v:"Whatever. Let's go."}],
@@ -334,7 +334,7 @@ const HIKERS = [
     quote:"This is just leg day with a view.",
     stats:[["Raw Power",98],["Grip",95],["Endurance",80],["Mobility",60]],
     loadout:[{ic:"🥚",k:"Snack",v:"6 eggs, pre-measured"},{ic:"🏋️",k:"Signature",v:"Pack as extra reps"},{ic:"🔩",k:"Pack Weight",v:"A kettlebell (why?)"},{ic:"⏱️",k:"Catch Phrase",v:"Are we timing this?"}],
-    roasts:["Blinded Spencer in one eye with a tennis ball as a kid and has been a nice guy ever since, like that squares it.","Electrician who does CrossFit. Two careers that both involve a lot of time in tight spaces with other men.","Used to flash people as a child. Now he\\'s very sweet and does CrossFit. The flashing was arguably the more interesting era.","The nicest guy on this mountain by a mile, which is suspicious. Nobody who blinded someone with a tennis ball should be this well-adjusted.","Genuinely the nicest guy here, which is insane considering he partially blinded a child and used to flash people. Character development of the century."]},
+    roasts:["Blinded Spencer in one eye with a tennis ball as a kid and has been a nice guy ever since, like that squares it.","Electrician who does CrossFit. Two careers that both involve a lot of time in tight spaces with other men.","Used to flash people as a child. Now he's very sweet and does CrossFit. The flashing was arguably the more interesting era.","The nicest guy on this mountain by a mile, which is suspicious. Nobody who blinded someone with a tennis ball should be this well-adjusted.","Genuinely the nicest guy here, which is insane considering he partially blinded a child and used to flash people. Character development of the century."]},
 ];
 /* ---- roster ---- */
 const roster = document.getElementById('roster');
@@ -477,17 +477,17 @@ const WP=[
 /* ---- book ---- */
 const ODDS=[
   {id:"summit",   q:"First to Summit",                      quip:"put your money where your lungs are",
-   lines:[{n:"Andrew",o:"-280"},{n:"Anthony",o:"+115"},{n:"Jaden",o:"+210"},{n:"Cole",o:"+360"},{n:"Spencer",o:"+480"},{n:"Tony",o:"+650"}]},
+   lines:[{n:"Andrew",o:"-280"},{n:"Anthony",o:"+115"},{n:"Jadon",o:"+210"},{n:"Cole",o:"+360"},{n:"Spencer",o:"+480"},{n:"Tony",o:"+650"}]},
   {id:"complain", q:"First to Complain About the Incline",  quip:"we know who it is. we all know.",
-   lines:[{n:"Tony",o:"-200"},{n:"Cole",o:"+155"},{n:"Spencer",o:"+220"},{n:"Anthony",o:"+280"},{n:"Jaden",o:"+330"},{n:"Andrew",o:"+550"}]},
+   lines:[{n:"Tony",o:"-200"},{n:"Cole",o:"+155"},{n:"Spencer",o:"+220"},{n:"Anthony",o:"+280"},{n:"Jadon",o:"+330"},{n:"Andrew",o:"+550"}]},
   {id:"poop",     q:"First to Handle Business in the Woods",quip:"nature calls. this is the answering machine.",
-   lines:[{n:"Cole",o:"-220"},{n:"Andrew",o:"+140"},{n:"Spencer",o:"+210"},{n:"Anthony",o:"+300"},{n:"Jaden",o:"+390"},{n:"Tony",o:"+420"}]},
+   lines:[{n:"Jadon",o:"-220"},{n:"Tony",o:"+140"},{n:"Cole",o:"+180"},{n:"Anthony",o:"+280"},{n:"Spencer",o:"+350"},{n:"Andrew",o:"+500"}]},
   {id:"lost",     q:"Most Likely to Get Everyone Lost",     quip:"some men just want to watch the ridge burn",
-   lines:[{n:"Cole",o:"-160"},{n:"Tony",o:"+170"},{n:"Anthony",o:"+215"},{n:"Spencer",o:"+330"},{n:"Jaden",o:"+420"},{n:"Andrew",o:"+510"}]},
+   lines:[{n:"Tony",o:"-160"},{n:"Anthony",o:"+170"},{n:"Spencer",o:"+220"},{n:"Jadon",o:"+330"},{n:"Andrew",o:"+420"},{n:"Cole",o:"+500"}]},
   {id:"injury",   q:"First to Fake an Injury for a Break",  quip:"oscar-worthy performance incoming",
-   lines:[{n:"Anthony",o:"-145"},{n:"Tony",o:"+135"},{n:"Spencer",o:"+215"},{n:"Cole",o:"+270"},{n:"Jaden",o:"+390"},{n:"Andrew",o:"+640"}]},
+   lines:[{n:"Anthony",o:"-145"},{n:"Tony",o:"+135"},{n:"Spencer",o:"+215"},{n:"Cole",o:"+270"},{n:"Jadon",o:"+390"},{n:"Andrew",o:"+640"}]},
   {id:"last",     q:"Dead Last to the Summit",              quip:"the view is the same. the shame is forever.",
-   lines:[{n:"Tony",o:"-195"},{n:"Spencer",o:"+160"},{n:"Cole",o:"+215"},{n:"Jaden",o:"+320"},{n:"Anthony",o:"+430"},{n:"Andrew",o:"+820"}]},
+   lines:[{n:"Spencer",o:"-195"},{n:"Tony",o:"+160"},{n:"Cole",o:"+215"},{n:"Jadon",o:"+320"},{n:"Anthony",o:"+430"},{n:"Andrew",o:"+820"}]},
 ];
 const oddsBoard=document.getElementById('odds-board');
 oddsBoard.innerHTML=ODDS.map(m=>{
