@@ -390,7 +390,9 @@ HIKERS.forEach((h,i)=>{
 });
 
 /* ---- card canvas renderer ---- */
+const TIER_HEX={green:'#4CB963',blue:'#4C8DFF',black:'#dfe3df',gold:'#F5B942'};
 function drawCard(h, t, roastText, callback){
+  const tc=TIER_HEX[h.tier]||'#4C8DFF';
   const W=500, S=2, PAD=24;
   const tmp=document.createElement('canvas').getContext('2d');
   function wrap(ctx2,text,maxW){
@@ -424,21 +426,21 @@ function drawCard(h, t, roastText, callback){
     fade.addColorStop(0,'rgba(9,15,12,0)'); fade.addColorStop(1,'rgba(9,15,12,1)');
     ctx.fillStyle=fade; ctx.fillRect(0,PHOTO_H-120,W,120);
     // tier color glow bar at very top
-    ctx.fillStyle=t.c; ctx.fillRect(0,0,W,4);
+    ctx.fillStyle=tc; ctx.fillRect(0,0,W,4);
     // callsign — top left over photo
     ctx.save();
     ctx.fillStyle='rgba(9,15,12,0.8)'; ctx.fillRect(0,0,W,34);
-    ctx.fillStyle=t.c; ctx.font='bold 12px "Space Mono",monospace'; ctx.textAlign='left';
-    ctx.shadowColor=t.c; ctx.shadowBlur=8;
+    ctx.fillStyle=tc; ctx.font='bold 12px "Space Mono",monospace'; ctx.textAlign='left';
+    ctx.shadowColor=tc; ctx.shadowBlur=8;
     ctx.fillText(h.call,PAD,21); ctx.restore();
     // LV badge — top right
     ctx.font='11px "Space Mono",monospace';
     const lvTxt='LV '+h.lvl, lvW=ctx.measureText(lvTxt).width+20;
     ctx.fillStyle='rgba(9,15,12,0.85)'; ctx.fillRect(W-lvW-12,8,lvW,20);
-    ctx.fillStyle=t.c; ctx.textAlign='right'; ctx.fillText(lvTxt,W-12-4,21); ctx.textAlign='left';
+    ctx.fillStyle=tc; ctx.textAlign='right'; ctx.fillText(lvTxt,W-12-4,21); ctx.textAlign='left';
     // name overlapping photo bottom — huge, with glow
     ctx.save();
-    ctx.shadowColor=t.c; ctx.shadowBlur=18;
+    ctx.shadowColor=tc; ctx.shadowBlur=18;
     ctx.fillStyle='#ffffff'; ctx.font='bold 54px "Anton",sans-serif';
     ctx.fillText(h.name.toUpperCase(),PAD,PHOTO_H-16);
     ctx.restore();
@@ -446,15 +448,15 @@ function drawCard(h, t, roastText, callback){
     let y=PHOTO_H+14;
     ctx.fillStyle='#7a9a88'; ctx.font='500 13px "Barlow Semi Condensed",sans-serif';
     ctx.fillText(h.cls.toUpperCase(),PAD,y);
-    ctx.fillStyle=t.c; ctx.font='500 13px "Barlow Semi Condensed",sans-serif';
+    ctx.fillStyle=tc; ctx.font='500 13px "Barlow Semi Condensed",sans-serif';
     ctx.fillText('  ·  '+t.label.toUpperCase()+' / '+t.rank.toUpperCase(),PAD+ctx.measureText(h.cls.toUpperCase()).width,y);
     y+=2;
     // tier color rule
-    ctx.fillStyle=t.c; ctx.fillRect(0,y+6,W,2); y+=18;
+    ctx.fillStyle=tc; ctx.fillRect(0,y+6,W,2); y+=18;
     // roast box
     if(roastText){
       ctx.fillStyle='#0f1a10'; ctx.fillRect(PAD,y,CW,ROAST_H-8);
-      ctx.fillStyle=t.c; ctx.fillRect(PAD,y,3,ROAST_H-8);
+      ctx.fillStyle=tc; ctx.fillRect(PAD,y,3,ROAST_H-8);
       ctx.fillStyle='#e8dcc8'; ctx.font='italic 15px "Barlow Semi Condensed",sans-serif';
       roastLines.forEach((l,i)=>{ctx.fillText(l,PAD+14,y+18+i*22);});
       y+=ROAST_H;
@@ -470,21 +472,18 @@ function drawCard(h, t, roastText, callback){
       ctx.fillStyle='#c8c0a8'; ctx.font='600 14px "Barlow Semi Condensed",sans-serif';
       ctx.fillText(String(s[0]),PAD,y+13);
       ctx.textAlign='right';
-      ctx.fillStyle=t.c; ctx.font='bold 12px "Space Mono",monospace';
+      ctx.fillStyle=tc; ctx.font='bold 12px "Space Mono",monospace';
       ctx.fillText(String(val),W-PAD,y+13);
       ctx.textAlign='left';
-      // track
       ctx.fillStyle='#243828'; ctx.fillRect(PAD,y+18,CW,8);
-      // fill
-      ctx.fillStyle=t.c; ctx.fillRect(PAD,y+18,Math.round(CW*val/100),8);
+      ctx.fillStyle=tc; ctx.fillRect(PAD,y+18,Math.round(CW*val/100),8);
       y+=32;
     });
     // bottom rule + url
     y+=6; ctx.fillStyle='#1e3328'; ctx.fillRect(0,y,W,1); y+=12;
     ctx.fillStyle='#2a4034'; ctx.font='10px "Space Mono",monospace'; ctx.textAlign='center';
     ctx.fillText('cyberyakker-star.github.io/NH',W/2,y+10);
-    // bottom tier bar
-    ctx.fillStyle=t.c; ctx.fillRect(0,H-4,W,4);
+    ctx.fillStyle=tc; ctx.fillRect(0,H-4,W,4);
     cv.toBlob(callback,'image/png');
   }
   const srcMatch=CHARS[h.char].match(/src="([^"]+)"/);
