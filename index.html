@@ -445,21 +445,29 @@ function select(i){
   });
   document.getElementById('share-btn').addEventListener('click', function(){
     const btn = this;
-    if(!cardBlob){
-      // blob not ready yet — fall back to URL share
-      if(navigator.share) navigator.share({title:'Squad Locker — '+h.name, url:'https://cyberyakker-star.github.io/NH'}).catch(()=>{});
-      return;
+    function doShare(blob){
+      const file = new File([blob], h.name+'-card.png', {type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file], title:h.name+' — Squad Locker'}).catch(()=>{});
+      } else {
+        // download as fallback
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = h.name+'-card.png';
+        a.click();
+      }
+      btn.innerHTML = SHARE_SVG+' Share';
+      btn.disabled = false;
     }
-    const file = new File([cardBlob], h.name+'-card.png', {type:'image/png'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({files:[file], title:h.name+' — Squad Locker'}).catch(()=>{});
-    } else if(navigator.share){
-      navigator.share({title:'Squad Locker — '+h.name, url:'https://cyberyakker-star.github.io/NH'}).catch(()=>{});
+    if(cardBlob){
+      doShare(cardBlob);
     } else {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(cardBlob);
-      a.download = h.name+'-card.png';
-      a.click();
+      btn.innerHTML = SHARE_SVG+' Capturing…';
+      btn.disabled = true;
+      html2canvas(document.getElementById('panel'), {
+        backgroundColor:'#0b1a12', scale:2, useCORS:true, allowTaint:true, logging:false
+      }).then(canvas=>canvas.toBlob(blob=>{ cardBlob=blob; doShare(blob); },'image/png'))
+        .catch(()=>{ btn.innerHTML=SHARE_SVG+' Share'; btn.disabled=false; });
     }
   });
 }
