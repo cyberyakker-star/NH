@@ -480,7 +480,7 @@ function drawCard(h, t, roastText, callback){
       ctx.fillText(s[1],W-PAD,y+14);
       ctx.textAlign='left';
       ctx.fillStyle='#1e3328'; ctx.fillRect(PAD,y+18,CONTENT_W,6);
-      ctx.fillStyle=t.c+'cc'; ctx.fillRect(PAD,y+18,CONTENT_W*(s[1]/100),6);
+      ctx.fillStyle=t.c; ctx.fillRect(PAD,y+18,CONTENT_W*(s[1]/100),6);
       y+=32;
     });
     // footer url
