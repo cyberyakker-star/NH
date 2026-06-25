@@ -62,6 +62,22 @@
   .cloud::before{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#b8c3bb;top:-6px;left:5px}
   .rain{width:3px;height:7px;border-radius:2px;background:var(--t-blue);position:absolute;bottom:-2px;left:9px;box-shadow:7px 2px 0 var(--t-blue),13px -1px 0 var(--t-blue)}
   .wxnote{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;margin-top:10px;opacity:.75}
+  .wxday{cursor:pointer;transition:border-color .15s,background .15s,transform .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  .wxday:hover{border-color:var(--bone-dim)}
+  .wxday.sel{border-color:var(--blaze);background:#13201a;transform:translateY(-2px)}
+  .wxstamp{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;margin-top:9px;opacity:.7}
+  .wxstamp.stale{color:var(--t-gold);opacity:.9}
+  .wxhourly{margin-top:10px;border:1px solid var(--line);border-radius:5px;background:#0b1510;overflow:hidden;max-height:0;opacity:0;transition:max-height .28s ease,opacity .2s ease}
+  .wxhourly.open{max-height:340px;opacity:1}
+  .wxhourly .hh{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--blaze);padding:10px 12px 6px;border-bottom:1px solid var(--line)}
+  .wxhrs{display:flex;gap:0;overflow-x:auto;padding:8px 6px}
+  .wxhr{flex:0 0 auto;min-width:52px;text-align:center;padding:6px 4px;border-right:1px solid #14241c}
+  .wxhr:last-child{border-right:none}
+  .wxhr .t{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:.06em;color:var(--bone-dim);text-transform:uppercase}
+  .wxhr .ic{width:22px;height:22px;margin:6px auto 4px;position:relative;transform:scale(.7)}
+  .wxhr .tp{font-family:'Anton',sans-serif;font-size:15px;line-height:1}
+  .wxhr .pp{font-family:'Space Mono',monospace;font-size:8px;color:var(--t-blue);margin-top:3px}
+  .wxhr .pp.dry{color:#3a5048}
 
   .ridge{display:block;width:100%;margin-top:22px}
   .ridge path{fill:#0f1c16;stroke:var(--line);stroke-width:1}
@@ -223,7 +239,8 @@
       <div class="opcard">
         <div class="lab">Forecast &mdash; Franconia Notch</div>
         <div class="wx" id="wx"></div>
-        
+        <div class="wxstamp" id="wxstamp"></div>
+        <div class="wxhourly" id="wxhourly"></div>
       </div>
     </div>
   </header>
@@ -437,27 +454,98 @@ function condLabel(code){
   const DATES=['2026-06-27','2026-06-28','2026-06-29','2026-06-30'];
   const LABELS=['Sat 6/27','Sun 6/28','Mon 6/29','Tue 6/30'];
   const HIKE_DATE='2026-06-28';
+  const CACHE_KEY='franconia_wx_cache_v1';
   const wxEl=document.getElementById('wx');
-  wxEl.innerHTML='<div style="grid-column:1/-1;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;padding:10px 0">Loading forecast...</div>';
-  fetch('https://api.open-meteo.com/v1/forecast?latitude=44.14&longitude=-71.68&daily=temperature_2m_max,temperature_2m_min,weathercode&temperature_unit=fahrenheit&timezone=America%2FNew_York&start_date=2026-06-27&end_date=2026-06-30')
+  const stampEl=document.getElementById('wxstamp');
+  const hourlyEl=document.getElementById('wxhourly');
+  let selDay=-1;
+
+  function fmtHour(iso){
+    const d=new Date(iso);let h=d.getHours();const ap=h<12?'AM':'PM';
+    h=h%12;if(h===0)h=12;return h+ap;
+  }
+  function timeAgo(ts){
+    const s=Math.floor((Date.now()-ts)/1000);
+    if(s<90)return'just now';
+    const m=Math.floor(s/60);if(m<60)return m+' min ago';
+    const h=Math.floor(m/60);if(h<24)return h+' hr ago';
+    const d=Math.floor(h/24);return d+' day'+(d>1?'s':'')+' ago';
+  }
+
+  function renderDays(model){
+    wxEl.innerHTML=DATES.map((date,i)=>{
+      const dd=model.daily[i];
+      const hike=date===HIKE_DATE;
+      return'<div class="wxday'+(hike?' hike':'')+(i===selDay?' sel':'')+'" data-i="'+i+'">'+
+        (hike?'<div class="flag">Summit Day</div>':'')+
+        '<div class="d">'+LABELS[i]+'</div>'+
+        '<div class="ic">'+icHTML(dd.code)+'</div>'+
+        '<div class="temp">'+dd.hi+'&deg;<small> / '+dd.lo+'&deg;</small></div>'+
+        '<div class="cond">'+condLabel(dd.code)+'</div></div>';
+    }).join('');
+    wxEl.querySelectorAll('.wxday').forEach(el=>{
+      el.addEventListener('click',()=>toggleDay(+el.dataset.i,model));
+    });
+  }
+
+  function toggleDay(i,model){
+    if(selDay===i){selDay=-1;hourlyEl.classList.remove('open');renderDays(model);return;}
+    selDay=i;renderDays(model);
+    const hrs=model.hourly[i]||[];
+    if(!hrs.length){hourlyEl.classList.remove('open');return;}
+    hourlyEl.innerHTML='<div class="hh">'+LABELS[i]+' &mdash; Hourly</div><div class="wxhrs">'+
+      hrs.map(h=>'<div class="wxhr"><div class="t">'+fmtHour(h.time)+'</div><div class="ic">'+icHTML(h.code)+'</div><div class="tp">'+h.temp+'&deg;</div><div class="pp'+(h.pp<20?' dry':'')+'">'+h.pp+'%</div></div>').join('')+
+      '</div>';
+    hourlyEl.classList.add('open');
+  }
+
+  function renderStamp(model,stale){
+    if(!model.fetched){stampEl.textContent='';return;}
+    stampEl.textContent=(stale?'// last updated ':'// updated ')+timeAgo(model.fetched);
+    stampEl.classList.toggle('stale',!!stale);
+  }
+
+  // 1) Render cached data immediately if present
+  let cached=null;
+  try{cached=JSON.parse(localStorage.getItem(CACHE_KEY));}catch(e){}
+  if(cached&&cached.daily){
+    renderDays(cached);
+    renderStamp(cached,true);
+  }else{
+    wxEl.innerHTML='<div style="grid-column:1/-1;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;padding:10px 0">Loading forecast...</div>';
+  }
+
+  // 2) Fetch fresh data
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=44.14&longitude=-71.68&daily=temperature_2m_max,temperature_2m_min,weathercode&hourly=temperature_2m,weathercode,precipitation_probability&temperature_unit=fahrenheit&timezone=America%2FNew_York&start_date=2026-06-27&end_date=2026-06-30')
     .then(r=>r.json())
     .then(data=>{
-      const days=data.daily;
-      wxEl.innerHTML=DATES.map((date,i)=>{
-        const hi=Math.round(days.temperature_2m_max[i]);
-        const lo=Math.round(days.temperature_2m_min[i]);
-        const code=days.weathercode[i];
-        const hike=date===HIKE_DATE;
-        return'<div class="wxday'+(hike?' hike':'')+'">'+
-          (hike?'<div class="flag">Summit Day</div>':'')+
-          '<div class="d">'+LABELS[i]+'</div>'+
-          '<div class="ic">'+icHTML(code)+'</div>'+
-          '<div class="temp">'+hi+'&deg;<small> / '+lo+'&deg;</small></div>'+
-          '<div class="cond">'+condLabel(code)+'</div></div>';
-      }).join('');
+      const d=data.daily,h=data.hourly;
+      const model={fetched:Date.now(),daily:[],hourly:[[],[],[],[]]};
+      DATES.forEach((date,i)=>{
+        model.daily.push({hi:Math.round(d.temperature_2m_max[i]),lo:Math.round(d.temperature_2m_min[i]),code:d.weathercode[i]});
+      });
+      // group hourly by date, every 3 hours to keep it readable
+      h.time.forEach((t,idx)=>{
+        const dateStr=t.slice(0,10);
+        const di=DATES.indexOf(dateStr);
+        if(di>=0){
+          const hr=new Date(t).getHours();
+          if(hr%3===0){
+            model.hourly[di].push({time:t,temp:Math.round(h.temperature_2m[idx]),code:h.weathercode[idx],pp:h.precipitation_probability[idx]});
+          }
+        }
+      });
+      try{localStorage.setItem(CACHE_KEY,JSON.stringify(model));}catch(e){}
+      renderDays(model);
+      renderStamp(model,false);
+      // keep expanded day open with fresh data
+      if(selDay>=0){const s=selDay;selDay=-1;toggleDay(s,model);}
     })
     .catch(()=>{
-      wxEl.innerHTML='<div style="grid-column:1/-1;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;padding:10px 0">// forecast unavailable offline</div>';
+      // offline: keep showing cached data (already rendered above). nothing to do.
+      if(!cached){
+        wxEl.innerHTML='<div style="grid-column:1/-1;font-family:Space Mono,monospace;font-size:9px;letter-spacing:.1em;color:var(--bone-dim);text-transform:uppercase;padding:10px 0">// forecast unavailable offline</div>';
+      }
     });
 })();
 
