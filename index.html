@@ -188,6 +188,20 @@
   .mkt-line.fav-line .mkt-odds{color:var(--t-gold)}
   .fav-tag{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--night);background:var(--t-gold);padding:2px 5px;border-radius:3px;margin-left:6px;vertical-align:middle}
 
+  /* movie night wheel */
+  .wheel-wrap{border:1px solid var(--line);border-radius:6px;background:linear-gradient(180deg,var(--night-2),var(--night));padding:22px 16px 26px;display:flex;flex-direction:column;align-items:center;gap:18px}
+  .wheel-stage{position:relative;width:min(360px,86vw);height:min(360px,86vw)}
+  .wheel-stage canvas{width:100%;height:100%;display:block;border-radius:50%;box-shadow:0 0 0 4px var(--moss-2),0 0 30px -6px var(--blaze)}
+  .wheel-ptr{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:22px solid var(--blaze);filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));z-index:3}
+  .wheel-hub{position:absolute;top:50%;left:50%;width:54px;height:54px;transform:translate(-50%,-50%);border-radius:50%;background:var(--night);border:2px solid var(--blaze);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;font-family:'Anton',sans-serif;font-size:14px;letter-spacing:.05em;color:var(--blaze);text-transform:uppercase;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .12s}
+  .wheel-hub:active{transform:translate(-50%,-50%) scale(.92)}
+  .wheel-spin-btn{font-family:'Anton',sans-serif;font-size:20px;letter-spacing:.05em;text-transform:uppercase;color:var(--night);background:var(--blaze);border:none;padding:12px 44px;border-radius:5px;cursor:pointer;box-shadow:0 0 24px -6px var(--blaze);-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:transform .12s,opacity .2s}
+  .wheel-spin-btn:active{transform:scale(.96)}
+  .wheel-spin-btn:disabled{opacity:.5;cursor:default}
+  .wheel-result{min-height:46px;text-align:center;font-family:'Barlow Semi Condensed',sans-serif}
+  .wheel-result .pick{font-family:'Anton',sans-serif;font-size:clamp(20px,5vw,28px);text-transform:uppercase;color:var(--bone);line-height:1.05}
+  .wheel-result .plat{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--blaze);margin-top:6px}
+  .wheel-result .idle{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--bone-dim)}
   .share-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);background:transparent;color:var(--bone-dim);padding:10px;border-radius:4px;cursor:pointer;margin-top:12px}
   .share-btn:active{background:rgba(255,255,255,.06)}
   .share-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a2e22;border:1px solid var(--line);color:var(--bone-dim);font-family:'Space Mono',monospace;font-size:10px;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:999}
@@ -227,6 +241,7 @@
     <button class="nav-btn" onclick="document.querySelector('.roster-section').scrollIntoView({behavior:'smooth'})">Roster</button>
     <button class="nav-btn" onclick="document.querySelector('.map-section').scrollIntoView({behavior:'smooth'})">Route</button>
     <button class="nav-btn" onclick="document.querySelector('.odds-section').scrollIntoView({behavior:'smooth'})">Odds</button>
+    <button class="nav-btn" onclick="document.querySelector('.movie-section').scrollIntoView({behavior:'smooth'})">Movie</button>
   </nav>
 
   <header class="hero">
@@ -292,6 +307,19 @@
   <section class="odds-section">
     <div class="sec-head"><h2>The Odds</h2><span class="meta">// OPENING LINES &mdash; NO MONEY CHANGES HANDS. ONLY LEGACY.</span></div>
     <div class="odds-board" id="odds-board"></div>
+  </section>
+
+  <section class="movie-section">
+    <div class="sec-head"><h2>Movie Night</h2><span class="meta">// SPIN TO DECIDE &mdash; NETFLIX &amp; HULU &mdash; NO ARGUING WITH THE WHEEL.</span></div>
+    <div class="wheel-wrap">
+      <div class="wheel-stage">
+        <div class="wheel-ptr"></div>
+        <canvas id="movie-wheel" width="720" height="720"></canvas>
+        <div class="wheel-hub" id="wheel-hub">Spin</div>
+      </div>
+      <button class="wheel-spin-btn" id="wheel-spin">Spin the Wheel</button>
+      <div class="wheel-result" id="wheel-result"><span class="idle">Tap spin to pick the movie</span></div>
+    </div>
   </section>
 </div>
 
@@ -755,6 +783,84 @@ oddsBoard.innerHTML=ODDS.map(m=>{
   }).join('');
   return '<div class="mkt"><div class="mkt-q">'+m.q+'</div><div class="mkt-quip">// '+m.quip+'</div><div class="mkt-lines">'+lines+'</div></div>';
 }).join('');
+
+/* ── MOVIE NIGHT SPIN WHEEL ──────────────────────────── */
+(function(){
+  // edit this list freely — t=title, p=platform
+  const MOVIES=[
+    {t:"The Wolf of Wall Street",p:"Netflix"},
+    {t:"Step Brothers",p:"Netflix"},
+    {t:"Tropic Thunder",p:"Hulu"},
+    {t:"21 Jump Street",p:"Netflix"},
+    {t:"The Hangover",p:"Netflix"},
+    {t:"Superbad",p:"Netflix"},
+    {t:"Anchorman",p:"Hulu"},
+    {t:"Pineapple Express",p:"Hulu"},
+    {t:"Old School",p:"Hulu"},
+    {t:"Talladega Nights",p:"Hulu"},
+    {t:"Game Night",p:"Hulu"},
+    {t:"The Big Lebowski",p:"Netflix"}
+  ];
+  const canvas=document.getElementById('movie-wheel');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const SZ=canvas.width, R=SZ/2, N=MOVIES.length, seg=2*Math.PI/N;
+  const COLORS=['#16241C','#1d3026'];
+  const TXT=['#EDE6D3','#FF6B35'];
+  function draw(rot){
+    ctx.clearRect(0,0,SZ,SZ);
+    for(let i=0;i<N;i++){
+      const a0=rot+i*seg, a1=a0+seg;
+      ctx.beginPath(); ctx.moveTo(R,R); ctx.arc(R,R,R-6,a0,a1); ctx.closePath();
+      ctx.fillStyle=COLORS[i%2]; ctx.fill();
+      ctx.strokeStyle='#2a4034'; ctx.lineWidth=2; ctx.stroke();
+      // label
+      ctx.save();
+      ctx.translate(R,R); ctx.rotate(a0+seg/2);
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      ctx.fillStyle=i%2?TXT[1]:TXT[0];
+      ctx.font='bold 26px "Barlow Semi Condensed",sans-serif';
+      let title=MOVIES[i].t;
+      if(title.length>22) title=title.slice(0,21)+'…';
+      ctx.fillText(title.toUpperCase(),R-26,0);
+      ctx.restore();
+    }
+    // outer ring
+    ctx.beginPath(); ctx.arc(R,R,R-6,0,2*Math.PI);
+    ctx.strokeStyle='#FF6B35'; ctx.lineWidth=4; ctx.stroke();
+  }
+  let cur=0, spinning=false;
+  draw(cur);
+  const btn=document.getElementById('wheel-spin');
+  const hub=document.getElementById('wheel-hub');
+  const result=document.getElementById('wheel-result');
+  function spin(){
+    if(spinning) return;
+    spinning=true; btn.disabled=true;
+    result.innerHTML='<span class="idle">Spinning…</span>';
+    const turns=5+Math.random()*3;            // 5–8 full turns
+    const target=cur+turns*2*Math.PI+Math.random()*2*Math.PI;
+    const start=cur, dur=4200+Math.random()*800, t0=performance.now();
+    function frame(now){
+      const p=Math.min(1,(now-t0)/dur);
+      const e=1-Math.pow(1-p,4);              // ease-out quart
+      cur=start+(target-start)*e;
+      draw(cur);
+      if(p<1){ requestAnimationFrame(frame); }
+      else{
+        spinning=false; btn.disabled=false;
+        // pointer is at top (-PI/2). find segment under it
+        const norm=((-Math.PI/2 - cur)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+        const idx=Math.floor(norm/seg)%N;
+        const m=MOVIES[idx];
+        result.innerHTML='<div class="pick">'+m.t+'</div><div class="plat">'+m.p+'</div>';
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  btn.addEventListener('click',spin);
+  hub.addEventListener('click',spin);
+})();
 
 /* ── FRANCONIA RIDGE MAP ─────────────────────────────── */
 (function(){
